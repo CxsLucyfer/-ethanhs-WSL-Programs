@@ -1,0 +1,1817 @@
+name: Jekyll site CI
+
+on:
+  push:
+    branches: [ "whitesource/configure" ]
+  pull_request:
+    branches: [ "whitesource/configure" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the site in the jekyll/builder container
+      run: |
+        docker run \
+        -v ${{ github.workspace }}:/srv/jekyll -v ${{ github.workspace }}/_site:/srv/jekyll/_site \
+        jekyll/builder:latest /bin/bash -c "chmod -R 777 /srv/jekyll && jekyll build --future"
+- name: Setup Java JDK
+  uses: actions/setup-java@v1.4.4
+  with:
+    # The Java version to make available on the path. Takes a whole or semver Java version, or 1.x syntax (e.g. 1.8 => Java 8.x). Early access versions can be specified in the form of e.g. 14-ea, 14.0.0-ea, or 14.0.0-ea.28
+    java-version: 
+    # The package type (jre, jdk, jdk+fx)
+    java-package: # optional, default is jdk
+    # The architecture (x86, x64) of the package.
+    architecture: # optional, default is x64
+    # Path to where the compressed JDK is located. The path could be in your source repository or a local path on the agent.
+    jdkFile: # optional
+    # ID of the distributionManagement repository in the pom.xml file. Default is `github`
+    server-id: # optional, default is github
+    # Environment variable name for the username for authentication to the Apache Maven repository. Default is $GITHUB_ACTOR
+    server-username: # optional, default is GITHUB_ACTOR
+    # Environment variable name for password or token for authentication to the Apache Maven repository. Default is $GITHUB_TOKEN
+    server-password: # optional, default is GITHUB_TOKEN
+    # Path to where the settings.xml file will be written. Default is ~/.m2.
+    settings-path: # optional
+    # GPG private key to import. Default is empty string.
+    gpg-private-key: # optional
+    # Environment variable name for the GPG private key passphrase. Default is $GPG_PASSPHRASE.
+    gpg-passphrase: # optional
+    - name: Setup Node.js environment
+  uses: actions/setup-node@v3.7.0
+  with:
+    # Set always-auth in npmrc.
+    always-auth: # optional, default is false
+    # Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0.
+    node-version: # optional
+    # File containing the version Spec of the version to use.  Examples: .nvmrc, .node-version, .tool-versions.
+    node-version-file: # optional
+    # Target architecture for Node to use. Examples: x86, x64. Will use system architecture by default.
+    architecture: # optional
+    # Set this option if you want the action to check for the latest available version that satisfies the version spec.
+    check-latest: # optional
+    # Optional registry to set up for auth. Will set the registry in a project level .npmrc and .yarnrc file, and set up auth to read in from env.NODE_AUTH_TOKEN.
+    registry-url: # optional
+    # Optional scope for authenticating against scoped registries. Will fall back to the repository owner when using the GitHub Packages registry (https://npm.pkg.github.com/).
+    scope: # optional
+    # Used to pull node distributions from node-versions. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
+    token: # optional, default is ${{ github.server_url == 'https://github.com' && github.token || '' }}
+    # Used to specify a package manager for caching in the default directory. Supported values: npm, yarn, pnpm.
+    cache: # optional
+    # Used to specify the path to a dependency file: package-lock.json, yarn.lock, etc. Supports wildcards or a list of file names for caching multiple dependencies.
+    cache-dependency-path: # optional
+    - name: Setup Go environment
+  uses: actions/setup-go@v4.0.1
+  with:
+    # The Go version to download (if necessary) and use. Supports semver spec and ranges.
+    go-version: # optional
+    # Path to the go.mod or go.work file.
+    go-version-file: # optional
+    # Set this option to true if you want the action to always check for the latest available version that satisfies the version spec
+    check-latest: # optional
+    # Used to pull node distributions from go-versions. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
+    token: # optional, default is ${{ github.server_url == 'https://github.com' && github.token || '' }}
+    # Used to specify whether caching is needed. Set to true, if you'd like to enable caching.
+    cache: # optional, default is true
+    # Used to specify the path to a dependency file - go.sum
+    cache-dependency-path: # optional
+    # Target architecture for Go to use. Examples: x86, x64. Will use system architecture by default.
+    architecture: # optional- name: Setup Go environment
+  uses: actions/setup-go@v4.0.1
+  with:
+    # The Go version to download (if necessary) and use. Supports semver spec and ranges.
+    go-version: # optional
+    # Path to the go.mod or go.work file.
+    go-version-file: # optional
+    # Set this option to true if you want the action to always check for the latest available version that satisfies the version spec
+    check-latest: # optional
+    # Used to pull node distributions from go-versions. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
+    token: # optional, default is ${{ github.server_url == 'https://github.com' && github.token || '' }}
+    # Used to specify whether caching is needed. Set to true, if you'd like to enable caching.
+    cache: # optional, default is true
+    # Used to specify the path to a dependency file - go.sum
+    cache-dependency-path: # optional
+    # Target architecture for Go to use. Examples: x86, x64. Will use system architecture by default.
+    architecture: # optional
+    
+    - name: Close Stale Issues
+  uses: actions/stale@v4.1.1
+  with:
+    # Token for the repository. Can be passed in using `{{ secrets.GITHUB_TOKEN }}`.
+    repo-token: # optional, default is ${{ github.token }}
+    # The message to post on the issue when tagging it. If none provided, will not mark issues stale.
+    stale-issue-message: # optional
+    # The message to post on the pull request when tagging it. If none provided, will not mark pull requests stale.
+    stale-pr-message: # optional
+    # The message to post on the issue when closing it. If none provided, will not comment when closing an issue.
+    close-issue-message: # optional
+    # The message to post on the pull request when closing it. If none provided, will not comment when closing a pull requests.
+    close-pr-message: # optional
+    # The number of days old an issue or a pull request can be before marking it stale. Set to -1 to never mark issues or pull requests as stale automatically.
+    days-before-stale: # optional, default is 60
+    # The number of days old an issue can be before marking it stale. Set to -1 to never mark issues as stale automatically. Override "days-before-stale" option regarding only the issues.
+    days-before-issue-stale: # optional
+    # The number of days old a pull request can be before marking it stale. Set to -1 to never mark pull requests as stale automatically. Override "days-before-stale" option regarding only the pull requests.
+    days-before-pr-stale: # optional
+    # The number of days to wait to close an issue or a pull request after it being marked stale. Set to -1 to never close stale issues or pull requests.
+    days-before-close: # optional, default is 7
+    # The number of days to wait to close an issue after it being marked stale. Set to -1 to never close stale issues. Override "days-before-close" option regarding only the issues.
+    days-before-issue-close: # optional
+    # The number of days to wait to close a pull request after it being marked stale. Set to -1 to never close stale pull requests. Override "days-before-close" option regarding only the pull requests.
+    days-before-pr-close: # optional
+    # The label to apply when an issue is stale.
+    stale-issue-label: # optional, default is Stale
+    # The label to apply when an issue is closed.
+    close-issue-label: # optional
+    # The labels that mean an issue is exempt from being marked stale. Separate multiple labels with commas (eg. "label1,label2").
+    exempt-issue-labels: # optional, default is 
+    # The label to apply when a pull request is stale.
+    stale-pr-label: # optional, default is Stale
+    # The label to apply when a pull request is closed.
+    close-pr-label: # optional
+    # The labels that mean a pull request is exempt from being marked as stale. Separate multiple labels with commas (eg. "label1,label2").
+    exempt-pr-labels: # optional, default is 
+    # The milestones that mean an issue or a pull request is exempt from being marked as stale. Separate multiple milestones with commas (eg. "milestone1,milestone2").
+    exempt-milestones: # optional, default is 
+    # The milestones that mean an issue is exempt from being marked as stale. Separate multiple milestones with commas (eg. "milestone1,milestone2"). Override "exempt-milestones" option regarding only the issues.
+    exempt-issue-milestones: # optional, default is 
+    # The milestones that mean a pull request is exempt from being marked as stale. Separate multiple milestones with commas (eg. "milestone1,milestone2"). Override "exempt-milestones" option regarding only the pull requests.
+    exempt-pr-milestones: # optional, default is 
+    # Exempt all issues and pull requests with milestones from being marked as stale. Default to false.
+    exempt-all-milestones: # optional, default is false
+    # Exempt all issues with milestones from being marked as stale. Override "exempt-all-milestones" option regarding only the issues.
+    exempt-all-issue-milestones: # optional, default is 
+    # Exempt all pull requests with milestones from being marked as stale. Override "exempt-all-milestones" option regarding only the pull requests.
+    exempt-all-pr-milestones: # optional, default is 
+    # Only issues or pull requests with all of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels.
+    only-labels: # optional, default is 
+    # Only issues or pull requests with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels.
+    any-of-labels: # optional, default is 
+    # Only issues with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels. Override "any-of-labels" option regarding only the issues.
+    any-of-issue-labels: # optional, default is 
+    # Only pull requests with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels. Override "any-of-labels" option regarding only the pull requests.
+    any-of-pr-labels: # optional, default is 
+    # Only issues with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels. Override "only-labels" option regarding only the issues.
+    only-issue-labels: # optional, default is 
+    # Only pull requests with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels. Override "only-labels" option regarding only the pull requests.
+    only-pr-labels: # optional, default is 
+    # The maximum number of operations per run, used to control rate limiting (GitHub API CRUD related).
+    operations-per-run: # optional, default is 30
+    # Remove stale labels from issues and pull requests when they are updated or commented on.
+    remove-stale-when-updated: # optional, default is true
+    # Remove stale labels from issues when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the issues.
+    remove-issue-stale-when-updated: # optional, default is 
+    # Remove stale labels from pull requests when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the pull requests.
+    remove-pr-stale-when-updated: # optional, default is 
+    # Run the processor in debug mode without actually performing any operations on live issues.
+    debug-only: # optional, default is false
+    # The order to get issues or pull requests. Defaults to false, which is descending.
+    ascending: # optional, default is false
+    # Delete the git branch after closing a stale pull request.
+    delete-branch: # optional, default is false
+    # The date used to skip the stale action on issue/pull request created before it (ISO 8601 or RFC 2822).
+    start-date: # optional, default is 
+    # The assignees which exempt an issue or a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2").
+    exempt-assignees: # optional, default is 
+    # The assignees which exempt an issue from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2"). Override "exempt-assignees" option regarding only the issues.
+    exempt-issue-assignees: # optional, default is 
+    # The assignees which exempt a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2"). Override "exempt-assignees" option regarding only the pull requests.
+    exempt-pr-assignees: # optional, default is 
+    # Exempt all issues and pull requests with assignees from being marked as stale. Default to false.
+    exempt-all-assignees: # optional, default is false
+    # Exempt all issues with assignees from being marked as stale. Override "exempt-all-assignees" option regarding only the issues.
+    exempt-all-issue-assignees: # optional, default is 
+    # Exempt all pull requests with assignees from being marked as stale. Override "exempt-all-assignees" option regarding only the pull requests.
+    exempt-all-pr-assignees: # optional, default is 
+    # Exempt draft pull requests from being marked as stale. Default to false.
+    exempt-draft-pr: # optional, default is false
+    # Display some statistics at the end regarding the stale workflow (only when the logs are enabled).
+    enable-statistics: # optional, default is true
+    # A comma delimited list of labels to add when a stale issue or pull request receives activity and has the stale-issue-label or stale-pr-label removed from it.
+    labels-to-add-when-unstale: # optional, default is 
+    # A comma delimited list of labels to remove when a stale issue or pull request receives activity and has the stale-issue-label or stale-pr-label removed from it.
+    labels-to-remove-when-unstale: # optional, default is 
+    # Any update (update/comment) can reset the stale idle time on the issues and pull requests.
+    ignore-updates: # optional, default is false
+    # Any update (update/comment) can reset the stale idle time on the issues. Override "ignore-updates" option regarding only the issues.
+    ignore-issue-updates: # optional, default is 
+    # Any update (update/comment) can reset the stale idle time on the pull requests. Override "ignore-updates" option regarding only the pull requests.
+    ignore-pr-updates: # optional, default is - name: Close Stale Issues
+  uses: actions/stale@v4.1.1
+  with:
+    # Token for the repository. Can be passed in using `{{ secrets.GITHUB_TOKEN }}`.
+    repo-token: # optional, default is ${{ github.token }}
+    # The message to post on the issue when tagging it. If none provided, will not mark issues stale.
+    stale-issue-message: # optional
+    # The message to post on the pull request when tagging it. If none provided, will not mark pull requests stale.
+    stale-pr-message: # optional
+    # The message to post on the issue when closing it. If none provided, will not comment when closing an issue.
+    close-issue-message: # optional
+    # The message to post on the pull request when closing it. If none provided, will not comment when closing a pull requests.
+    close-pr-message: # optional
+    # The number of days old an issue or a pull request can be before marking it stale. Set to -1 to never mark issues or pull requests as stale automatically.
+    days-before-stale: # optional, default is 60
+    # The number of days old an issue can be before marking it stale. Set to -1 to never mark issues as stale automatically. Override "days-before-stale" option regarding only the issues.
+    days-before-issue-stale: # optional
+    # The number of days old a pull request can be before marking it stale. Set to -1 to never mark pull requests as stale automatically. Override "days-before-stale" option regarding only the pull requests.
+    days-before-pr-stale: # optional
+    # The number of days to wait to close an issue or a pull request after it being marked stale. Set to -1 to never close stale issues or pull requests.
+    days-before-close: # optional, default is 7
+    # The number of days to wait to close an issue after it being marked stale. Set to -1 to never close stale issues. Override "days-before-close" option regarding only the issues.
+    days-before-issue-close: # optional
+    # The number of days to wait to close a pull request after it being marked stale. Set to -1 to never close stale pull requests. Override "days-before-close" option regarding only the pull requests.
+    days-before-pr-close: # optional
+    # The label to apply when an issue is stale.
+    stale-issue-label: # optional, default is Stale
+    # The label to apply when an issue is closed.
+    close-issue-label: # optional
+    # The labels that mean an issue is exempt from being marked stale. Separate multiple labels with commas (eg. "label1,label2").
+    exempt-issue-labels: # optional, default is 
+    # The label to apply when a pull request is stale.
+    stale-pr-label: # optional, default is Stale
+    # The label to apply when a pull request is closed.
+    close-pr-label: # optional
+    # The labels that mean a pull request is exempt from being marked as stale. Separate multiple labels with commas (eg. "label1,label2").
+    exempt-pr-labels: # optional, default is 
+    # The milestones that mean an issue or a pull request is exempt from being marked as stale. Separate multiple milestones with commas (eg. "milestone1,milestone2").
+    exempt-milestones: # optional, default is 
+    # The milestones that mean an issue is exempt from being marked as stale. Separate multiple milestones with commas (eg. "milestone1,milestone2"). Override "exempt-milestones" option regarding only the issues.
+    exempt-issue-milestones: # optional, default is 
+    # The milestones that mean a pull request is exempt from being marked as stale. Separate multiple milestones with commas (eg. "milestone1,milestone2"). Override "exempt-milestones" option regarding only the pull requests.
+    exempt-pr-milestones: # optional, default is 
+    # Exempt all issues and pull requests with milestones from being marked as stale. Default to false.
+    exempt-all-milestones: # optional, default is false
+    # Exempt all issues with milestones from being marked as stale. Override "exempt-all-milestones" option regarding only the issues.
+    exempt-all-issue-milestones: # optional, default is 
+    # Exempt all pull requests with milestones from being marked as stale. Override "exempt-all-milestones" option regarding only the pull requests.
+    exempt-all-pr-milestones: # optional, default is 
+    # Only issues or pull requests with all of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels.
+    only-labels: # optional, default is 
+    # Only issues or pull requests with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels.
+    any-of-labels: # optional, default is 
+    # Only issues with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels. Override "any-of-labels" option regarding only the issues.
+    any-of-issue-labels: # optional, default is 
+    # Only pull requests with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels. Override "any-of-labels" option regarding only the pull requests.
+    any-of-pr-labels: # optional, default is 
+    # Only issues with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels. Override "only-labels" option regarding only the issues.
+    only-issue-labels: # optional, default is 
+    # Only pull requests with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels. Override "only-labels" option regarding only the pull requests.
+    only-pr-labels: # optional, default is 
+    # The maximum number of operations per run, used to control rate limiting (GitHub API CRUD related).
+    operations-per-run: # optional, default is 30
+    # Remove stale labels from issues and pull requests when they are updated or commented on.
+    remove-stale-when-updated: # optional, default is true
+    # Remove stale labels from issues when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the issues.
+    remove-issue-stale-when-updated: # optional, default is 
+    # Remove stale labels from pull requests when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the pull requests.
+    remove-pr-stale-when-updated: # optional, default is 
+    # Run the processor in debug mode without actually performing any operations on live issues.
+    debug-only: # optional, default is false
+    # The order to get issues or pull requests. Defaults to false, which is descending.
+    ascending: # optional, default is false
+    # Delete the git branch after closing a stale pull request.
+    delete-branch: # optional, default is false
+    # The date used to skip the stale action on issue/pull request created before it (ISO 8601 or RFC 2822).
+    start-date: # optional, default is 
+    # The assignees which exempt an issue or a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2").
+    exempt-assignees: # optional, default is 
+    # The assignees which exempt an issue from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2"). Override "exempt-assignees" option regarding only the issues.
+    exempt-issue-assignees: # optional, default is 
+    # The assignees which exempt a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2"). Override "exempt-assignees" option regarding only the pull requests.
+    exempt-pr-assignees: # optional, default is 
+    # Exempt all issues and pull requests with assignees from being marked as stale. Default to false.
+    exempt-all-assignees: # optional, default is false
+    # Exempt all issues with assignees from being marked as stale. Override "exempt-all-assignees" option regarding only the issues.
+    exempt-all-issue-assignees: # optional, default is 
+    # Exempt all pull requests with assignees from being marked as stale. Override "exempt-all-assignees" option regarding only the pull requests.
+    exempt-all-pr-assignees: # optional, default is 
+    # Exempt draft pull requests from being marked as stale. Default to false.
+    exempt-draft-pr: # optional, default is false
+    # Display some statistics at the end regarding the stale workflow (only when the logs are enabled).
+    enable-statistics: # optional, default is true
+    # A comma delimited list of labels to add when a stale issue or pull request receives activity and has the stale-issue-label or stale-pr-label removed from it.
+    labels-to-add-when-unstale: # optional, default is 
+    # A comma delimited list of labels to remove when a stale issue or pull request receives activity and has the stale-issue-label or stale-pr-label removed from it.
+    labels-to-remove-when-unstale: # optional, default is 
+    # Any update (update/comment) can reset the stale idle time on the issues and pull requests.
+    ignore-updates: # optional, default is false
+    # Any update (update/comment) can reset the stale idle time on the issues. Override "ignore-updates" option regarding only the issues.
+    ignore-issue-updates: # optional, default is 
+    # Any update (update/comment) can reset the stale idle time on the pull requests. Override "ignore-updates" option regarding only the pull requests.
+    ignore-pr-updates: # optional, default is 
+    - name: Download a Build Artifact
+  uses: actions/download-artifact@v2.1.1
+  with:
+    # Artifact name
+    name: # optional
+    # Destination path
+    path: # optional- name: Download a Build Artifact
+  uses: actions/download-artifact@v2.1.1
+  with:
+    # Artifact name
+    name: # optional
+    # Destination path
+    path: # optional
+    - name: Add debian repository
+  # You may pin to the exact commit or the version.
+  # uses: myci-actions/add-deb-repo@43408b9f0225d1c64ba667d59e337c6140383bbe
+  uses: myci-actions/add-deb-repo@11
+  with:
+    # repository line as it appears in the sources.list
+    repo: 
+    # name of the repository, the name will be used for a new file in the /etc/apt/sources.list.d directory, the .list suffix will be added to the name
+    repo-name: 
+    # repository keys to import using apt-key
+    keys: # optional
+    # key server to import repository keys from, or direct URL to key if "keys" is not specified
+    key-server: # optional
+    # URL to ascii armored keys, the key is saved to /etc/apt/trusted.gpg.d/<repo-name>.asc
+    keys-asc: # optional
+    # perform 'apt update' after adding the repo
+    update: # optional, default is true
+    # space separated list of packages to install after adding the repo, update will be performed first
+    install: # optional
+    - name: D Compiler Installation
+  # You may pin to the exact commit or the version.
+  # uses: dlang-community/setup-dlang@43589c229861e1720e187a344c67dad1d9eefe4c
+  uses: dlang-community/setup-dlang@v1.3.0
+  with:
+    # Compiler version string, for example 'dmd-latest' or 'ldc-1.20.1'
+    compiler: # optional, default is dmd-latest
+    # DUB version string, for example 'latest' or '1.29.0'
+    dub: # optional
+    # Token to use when doing Github API request (for ldc-master)
+    gh_token: # optional, default is ${{ github.token }}
+    - name: Run D-Scanner (D language linter) with reviewdog
+  # You may pin to the exact commit or the version.
+  # uses: dgellow/action-dscanner@73ad2e6e1ce964098994df7ba9f1faae0a3683c0
+  uses: dgellow/action-dscanner@v1.0.1
+  with:
+    # GITHUB_TOKEN
+    github_token: # optional, default is ${{ github.token }}
+    # Report level for reviewdog [info,warning,error]
+    level: # optional, default is error
+    # Reporter of reviewdog command [github-pr-check,github-pr-review]
+    reporter: # optional, default is github-pr-review
+    # Root directory where D-Scanner should be run from
+    path: # optional, default is - name: Run D-Scanner (D language linter) with reviewdog
+  # You may pin to the exact commit or the version.
+  # uses: dgellow/action-dscanner@73ad2e6e1ce964098994df7ba9f1faae0a3683c0
+  uses: dgellow/action-dscanner@v1.0.1
+  with:
+    # GITHUB_TOKEN
+    github_token: # optional, default is ${{ github.token }}
+    # Report level for reviewdog [info,warning,error]
+    level: # optional, default is error
+    # Reporter of reviewdog command [github-pr-check,github-pr-review]
+    reporter: # optional, default is github-pr-review
+    # Root directory where D-Scanner should be run from
+    path: # optional, default is 
+    - name: actions-argocd
+  # You may pin to the exact commit or the version.
+  # uses: dshare-inc/actions-argocd@ce5da22f94eeb969bbeffcc8eddd23f0fce81b14
+  uses: dshare-inc/actions-argocd@1.0.0
+  with:
+    # Action type. (put, delete).
+    action: 
+    # ArgoCD Manifest (helm chart values.yaml) path
+    manifest_path: # default is values.yaml
+    # Allow update
+    enable_update: # optional, default is true
+    # Protect by lifecycle
+    enable_permanent_protection: # optional, default is true
+    # dev, stage, prod
+    env: 
+    # Unique key
+    key: 
+    # temporary, permanent
+    lifecycle: # optional, default is temporary
+    # Docker image tag
+    image_tag: 
+    # blue_green or canary
+    deployment_strategy: # optional, default is blue_green
+    # Github trigger type (pull_request, push)
+    action_type: 
+    # Github trigger action work number
+    action_worker_number: 
+    # Github trigger action commit message
+    action_commit_message: # optional
+    # Github trigger action commit sha
+    action_commit_sha: # optional
+    - name: Hercules Insights
+  # You may pin to the exact commit or the version.
+  # uses: src-d/hercules@6959c0d102ed485929385d87c56a9910551ad0b1
+  uses: src-d/hercules@v10.7.2
+  with:
+    # hercules command line arguments
+    args: # optional, default is --burndown --burndown-people --devs --couples- name: Hercules Insights
+  # You may pin to the exact commit or the version.
+  # uses: src-d/hercules@6959c0d102ed485929385d87c56a9910551ad0b1
+  uses: src-d/hercules@v10.7.2
+  with:
+    # hercules command line arguments
+    args: # optional, default is --burndown --burndown-people --devs --couples
+    - name: Simple Lead Time Action
+  # You may pin to the exact commit or the version.
+  # uses: d-kanai/simple-lead-time-action@7fe222c8de8f14923a73fa3d7eea9fad64114475
+  uses: d-kanai/simple-lead-time-action@v1.1.1
+  - name: Remark Action
+  # You may pin to the exact commit or the version.
+  # uses: ocular-d/action-remark@74035a23b4975236c9fdeb0248f30f2f8ad64b1e
+  uses: ocular-d/action-remark@0.0.10
+  with:
+    # Name of the directory remark should check
+    check_dir: # default is docs
+    - name: Remark Action
+  # You may pin to the exact commit or the version.
+  # uses: ocular-d/action-remark@74035a23b4975236c9fdeb0248f30f2f8ad64b1e
+  uses: ocular-d/action-remark@0.0.10
+  with:
+    # Name of the directory remark should check
+    check_dir: # default is docs- name: Remark Action
+  # You may pin to the exact commit or the version.
+  # uses: ocular-d/action-remark@74035a23b4975236c9fdeb0248f30f2f8ad64b1e
+  uses: ocular-d/action-remark@0.0.10
+  with:
+    # Name of the directory remark should check
+    check_dir: # default is docs
+    - name: PHPCS GitHub action running WPThemeReview checks
+  # You may pin to the exact commit or the version.
+  # uses: dingo-d/wpthemereview-gh-action@cd4a69dffa359a393dd29a2dbb45ad9e6062cf55
+  uses: dingo-d/wpthemereview-gh-action@0.0.3
+  with:
+    # Version of WordPress to check the compatibility
+    wp_version: # default is 5.5.1
+    # Version of PHP to check the compatibility
+    php_version: # default is 7.4
+    # Prefix of your theme
+    prefix: # optional, default is 
+    # Folders to ignore
+    ignore: # optional, default is vendor
+- name: Amazon CodeArtifact Auth
+  # You may pin to the exact commit or the version.
+  # uses: dshare-inc/actions-codeartifact-auth@89dedb384a3374f36a72cc684fb72ce6ee26c533
+  uses: dshare-inc/actions-codeartifact-auth@1.0.1
+  with:
+    # AWS CodeArtifact Region
+    region: 
+    # AWS CodeArtifact Domain Name
+    domain: 
+    # AWS CodeArtifact Owner Account Id
+    owner: 
+    # Session duration
+    duration: # optional, default is 900
+    # CodeArtifact Repository Type. npm or gradle
+    type: 
+    # CodeArtifact Repository Name
+    repo: 
+    - name: md-linkcheck
+  # You may pin to the exact commit or the version.
+  # uses: ocular-d/md-linkcheck-action@a9afa0766e93452c9af721ac878cb496011809e9
+  uses: ocular-d/md-linkcheck-action@1.0.2
+  - name: AIReviewRadar
+  # You may pin to the exact commit or the version.
+  # uses: purvesh-d/AIReviewRadar@be3636403ab5f309e0e4f282d23bf5efc67fff4b
+  uses: purvesh-d/AIReviewRadar@1.0.2
+  with:
+    # Enable debug mode
+    debug: # optional, default is false
+    # Max files to summarize. Less than or equal to 0 means no limit.
+    max_files_to_summarize: # optional, default is 40
+    # Max files to review. Less than or equal to 0 means no limit.
+    max_files_to_review: # optional, default is 25
+    # Leave comments even if the patch is LGTM
+    review_comment_lgtm: # optional, default is false
+    # The path filters, e.g., "src/**.py", "!dist/**", each line will be considered as one pattern.
+See also
+
+- https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onpushpull_requestpull_request_targetpathspaths-ignore
+- https://github.com/isaacs/minimatch
+
+    path_filters: # optional, default is !dist/**
+!**/*.pb.go
+!**/*.lock
+!**/*.yaml
+!**/*.yml
+!**/*.cfg
+!**/*.toml
+!**/*.ini
+!**/*.mod
+!**/*.sum
+!**/*.work
+!**/*.json
+!**/*.mmd
+!**/*.svg
+!**/*.png
+!**/*.dot
+!**/*.md5sum
+!**/*.wasm
+!**/gen/**
+!**/_gen/**
+!**/vendor/**
+
+    # Model to use
+    openai_model: # optional, default is gpt-3.5-turbo
+    # Temperature for GPT model
+    openai_model_temperature: # optional, default is 0.0
+    # How many times to retry OpenAI API in case of timeouts or errors?
+    openai_retries: # optional, default is 5
+    # Timeout for OpenAI API call in millis
+    openai_timeout_ms: # optional, default is 120000
+    # How many concurrent API calls to make to OpenAI servers?
+    openai_concurrency_limit: # optional, default is 4
+    # System message to be sent to OpenAI
+    system_message: # optional, default is You are `@openai` (aka `github-actions[bot]`), a highly
+experienced software engineer with a strong ability to review 
+code changes thoroughly.
+
+Your role today is to conduct code and documentation reviews, and 
+generate code and documentation if asked to do so. You will point 
+out potential issues such as security (e.g. XSS), logic errors, 
+syntax errors, out of bound errors, data races, livelocks, starvation, 
+suspension, order violation, atomicity violation, consistency, 
+complexity, error handling, typos, grammar, and more. Please indicate this in the comments section.
+
+    # The prompt for the whole pull request
+    summarize_beginning: # optional, default is $system_message
+
+In this session, we will summarize a pull request. 
+
+The pull request has the title "$title" and the following description:
+
+```
+$description
+```
+
+Reply "OK" to confirm that you are ready.
+
+    # The prompt for each file diff
+    summarize_file_diff: # optional, default is I am providing diff for `$filename` below. I would like you to summarize 
+the diff within 30 words.
+
+```diff
+$file_diff
+```
+
+    # The prompt for final summarization response
+    summarize: # optional, default is This is the end of the summarization session. Below is the summary you have 
+generated so far for each file.
+
+```
+$summary
+```
+
+Please provide your final response in the `markdown` format with 
+the following content:
+  - Thank the user for letting you participate in the code review. 
+  - High-level summary (comment on the overall change instead of 
+    specific files within 80 words)
+
+Avoid additional commentary as this summary will be added as a comment on the pull request.
+
+    # The prompt for generating release notes
+    summarize_release_notes: # optional, default is Create concise release notes in `markdown` format for this pull request, 
+focusing on its purpose and user story. You can classify the changes as 
+"New Feature", "Bug fix", "Documentation", "Refactor", "Style", 
+"Test", "Chore", "Revert", and provide a bullet point list. For example: 
+"New Feature: An integrations page was added to the UI". Keep your 
+response within 50-100 words. Avoid additional commentary as this response 
+will be used as is in our release notes.
+
+Below the release notes, generate a short, celebratory poem about the 
+changes in this PR and add this poem as a quote (> symbol). You can 
+use emojis in the poem, where they are relevant.
+
+    # The beginning prompt of a code review dialog
+    review_beginning: # optional, default is $system_message
+
+I will provide you with some files and the entire diff to help you build 
+context, unless the content is too large. Then, I will send you each patch 
+from the diff for review.
+
+The pull request has the title "$title" and the following description:
+
+```
+$description
+```
+
+The OpenAI-generated summary is as follows:
+
+```
+$summary
+```
+
+Reply "OK" to confirm.
+
+    # The prompt for each file
+    review_file: # optional, default is Here is the content of `$filename` for context. Please use this context 
+when reviewing patches. 
+
+When reviewing patch files, first check if the filename is from or contains ignored file types such as storyboard, pbxproj, xcschemae, info.plist. If it is, respond with "LGTM!" if included in the pull request and do not review further. Next, check if the file is from the list of files to be putted in gitignore for Android or iOS. If it is, provide a short comment to add it to gitignore instead of "LGTM" and do not review further.
+
+1. List of file that should be putted in gitignore list for anroid.
+         *.apk, *.ap_, *.dex, *.class, bin/, gen/, local.properties, *.iml, *.log, .idea/, .gradle/, build/, 
+         captures/, .externalNativeBuild, .cxx/, gradlew
+
+2. List of file that should be putted in gitignore list for iOS.
+         .DS_Store, */build/, DerivedData/, *.pbxuser, !default.pbxuser, *.mode1v3, !default.mode1v3, *.mode2v3,
+         !default.mode2v3, *.perspectivev3, !default.perspectivev3,
+
+Finally, if the file is not in the above list, review the code according to the guidelines listed below:
+
+  Below is the guidelines to check if the patch file is not from above ignore list.
+    1. Each function should have a maximum of 4 parameters.
+    2. All variables should have access modifiers.
+    3. Variable names should be at least 3 characters long, lower camel case and meaningful.
+    4. Function name should be in lowercamel case.
+    5. There should be no more than one extra space or empty line in the code.
+    6. If the code is written in Swift, there should be following comment on every top of extension: "// MARK: - "
+    7. There should be at most one statement per line, and each statement should be followed by a line break, except when the line ends with a block that also contains zero or one statements.
+    8. A single Unicode space should appear only in the following places and if not there then add comment for formatting issue.:
+      a. Separating any reserved word starting a conditional or switch statement (such as if, guard, while, or switch) from the expression that follows it if that expression starts with an open parenthesis (().
+      b. Before any closing curly brace (}) that follows code on the same line, before any open curly brace ({), and after any open curly brace ({) that is followed by code on the same line.
+      c. On both sides of any binary or ternary operator, the = sign used in assignment, initialization of variables/properties, and default arguments in functions.
+      d. The arrow (->) preceding the return type of a function.
+      e. There should be no space on either side of the dot (.) used to reference value and type members.
+      f. After, but not before, the comma (,) in parameter lists and in tuple/array/dictionary literals.
+      g. After, but not before, the colon (:) in dictionary literals and switch statements.
+    9. There should be at least two spaces before and exactly one space after the double slash (//) that begins an end-of-line comment.
+    10. Outside, but not inside, the brackets of an array or dictionary literals and the parentheses of a tuple literal.
+    11. Parentheses should not be used around the top-most expression that follows an if, guard, while, or switch keyword.
+    12. Case statements are indented at the same level as the switch statement to which they belong; the statements inside the case blocks are then indented +2 spaces from that level.
+    13. In general, there should be only one case per line in an enum. The comma-delimited form may be used only when none of the cases have associated values or raw values, all cases fit on a single line, and the cases do not need further documentation because their meanings are obvious from their names.
+    14. Force-unwrapping and force-casting are often code smells and are strongly discouraged.
+    15. Check for the code logic and provide feedback if any improvments needed.
+    16. Variables, funcations, calss, struct and all members naming should be meaning full and understandble by any developer.
+
+  Review the code according to these guidelines and provide feedback without "LGTM!" if any of the guidelines are not met, avoiding extra comments. Else just reply with "LGTM!".
+      
+```
+$file_content
+```
+
+    # The prompt for each file diff
+    review_file_diff: # optional, default is Here is the entire diff for `$filename` for context. Please use this context 
+when reviewing patches.
+
+```diff
+$file_diff
+```
+
+Reply "OK" to confirm.
+
+    # The prompt for each file diff
+    review_patch_begin: # optional, default is Next, I will send you a series of patches. Each patch consists of a diff snippet, 
+and your task is to review every patch. 
+
+When reviewing patch files, first check if the filename is from or contains ignored file types such as storyboard, pbxproj, xcschemae, info.plist. If it is, respond with "LGTM!" if included in the pull request and do not review further. Next, check if the file is from the list of files to be putted in gitignore for Android or iOS. If it is, provide a short comment to add it to gitignore instead of "LGTM!" and do not review further.
+
+1. List of file that should be putted in gitignore list for anroid.
+         *.apk, *.ap_, *.dex, *.class, bin/, gen/, local.properties, *.iml, *.log, .idea/, .gradle/, build/, 
+         captures/, .externalNativeBuild, .cxx/, gradlew
+
+2. List of file that should be putted in gitignore list for iOS.
+         .DS_Store, */build/, DerivedData/, *.pbxuser, !default.pbxuser, *.mode1v3, !default.mode1v3, *.mode2v3,
+         !default.mode2v3, *.perspectivev3, !default.perspectivev3,
+
+Finally, if the file is not in the above list, review the code according to the guidelines listed below:
+
+  1. Each function should have a maximum of 4 parameters.
+  2. All variables should have access modifiers.
+  3. Variable names should be at least 3 characters long, lower camel case and meaningful.
+  4. Function name should be in lowercamel case.
+  5. There should be no more than one extra space or empty line in the code.
+  6. If the code is written in Swift, there should be following comment on every top of extension: MARK: -
+  7. There should be at most one statement per line, and each statement should be followed by a line break, except when the line ends with a block that also contains zero or one statements.
+  8. A single Unicode space should appear only in the following places and if not there then add comment for formatting issue.:
+  a. Separating any reserved word starting a conditional or switch statement (such as if, guard, while, or switch) from the expression that follows it if that expression starts with an open parenthesis (().
+  b. Before any closing curly brace (}) that follows code on the same line, before any open curly brace ({), and after any open curly brace ({) that is followed by code on the same line.
+  c. On both sides of any binary or ternary operator, the = sign used in assignment, initialization of variables/properties, and default arguments in functions.
+  d. The arrow (->) preceding the return type of a function.
+  e. There should be no space on either side of the dot (.) used to reference value and type members.
+  f. After, but not before, the comma (,) in parameter lists and in tuple/array/dictionary literals.
+  g. After, but not before, the colon (:) in dictionary literals and switch statements.
+9. There should be at least two spaces before and exactly one space after the double slash (//) that begins an end-of-line comment.
+10. Outside, but not inside, the brackets of an array or dictionary literals and the parentheses of a tuple literal.
+11. Parentheses should not be used around the top-most expression that follows an if, guard, while, or switch keyword.
+12. Case statements are indented at the same level as the switch statement to which they belong; the statements inside the case blocks are then indented +2 spaces from that level.
+13. In general, there should be only one case per line in an enum. The comma-delimited form may be used only when none of the cases have associated values or raw values, all cases fit on a single line, and the cases do not need further documentation because their meanings are obvious from their names.
+14. Force-unwrapping and force-casting are often code smells and are strongly discouraged.
+15. Check for the code logic and provide feedback if any improvments needed.
+16. Variables, funcations, calss, struct and all members naming should be meaning full and understandble by any developer.
+
+Review the code according to these guidelines and provide feedback without "LGTM!" if any of the guidelines are not met, avoiding extra comments.Else just reply with "LGTM!" 
+Your responses will be recorded as review comments on the pull request. 
+Markdown format is preferred for your responses. 
+
+Reply "OK" to confirm.
+
+    # The prompt for each chunks/patches
+    review_patch: # optional, default is $filename
+
+Existing comments on the patch, though some of them may be outdated. 
+Please use them as additional context.
+```
+$comment_chain
+```
+
+Diff for review:
+```diff
+$patch
+```
+
+    # Prompt for comment
+    comment_beginning: # optional, default is $system_message
+
+A comment was made on a review for a diff patch on file 
+`$filename`. I would like you to follow the instructions 
+in that comment. 
+
+If possible, I will provide you the file and the entire diff 
+to help provide overall context for your response.
+
+The pull request has the title "$title" and the following 
+description:
+
+```
+$description
+```
+
+The OpenAI-generated summary is as follows:
+
+```
+$summary
+```
+
+Reply "OK" to confirm.
+
+    # Prompt for file
+    comment_file: # optional, default is Here is the content of `$filename` for context.
+
+```
+$file_content
+```
+
+Reply "OK" to confirm.
+
+    # Prompt for file diff
+    comment_file_diff: # optional, default is Here is the entire diff for `$filename` for context.
+
+```diff
+$file_diff
+```
+
+Reply "OK" to confirm.
+
+    # Prompt for comment
+    comment: # optional, default is I would like you to follow the instructions in the new 
+comment made on a conversation chain on a code review diff.
+
+Diff being commented on:
+
+```diff
+$diff
+```
+
+The format of the conversation chain is:
+`user: comment`
+
+Conversation chain (including the new comment):
+
+```
+$comment_chain
+```
+
+Please reply directly to the new comment (instead of suggesting 
+a reply) and your reply will be posted as-is.
+
+If the comment contains instructions/requests for you, please comply. 
+For example, if the comment is asking you to generate documentation 
+comments on the code, in your reply please generate the required code.
+
+In your reply, please make sure to begin the reply by tagging the user 
+with "@user".
+
+The comment/request that you need to directly reply to:
+
+```
+$comment
+```
+- name: RuboCop Run Action
+  # You may pin to the exact commit or the version.
+  # uses: d-lebed/rubocop-run-action@01b225ae555926cbef375dcd9a30fa4d49241aa2
+  uses: d-lebed/rubocop-run-action@v0.9.0
+  with:
+    # RuboCop command line options
+    options: # optional, default is --format=github
+    # Preserve RuboCop exit code
+    preserve_exitcode: # optional, default is true
+    # Enables Reviewdog JSON formatter
+    rdjson_formatter: # optional
+    # From which directory to run RuboCop
+    workdir: # optional
+- name: json-lint
+  # You may pin to the exact commit or the version.
+  # uses: ocular-d/json-linter@7d3716a34bcd6fcc5b3b38141a21b9e02da6531d
+  uses: ocular-d/json-linter@0.0.2
+    - name: Find Trailing Whitespace In Markdown
+  # You may pin to the exact commit or the version.
+  # uses: ocular-d/trailing-spaces@a75152001b3ad52ea91087c8b18e195d0ae1cfaf
+  uses: ocular-d/trailing-spaces@0.0.2
+  - name: Deploy Docker to Azure VM
+  # You may pin to the exact commit or the version.
+  # uses: bitovi/github-actions-docker-to-azure-vm@0a044e4e9c35096c7b8b6cb926fdd25c64cab067
+  uses: bitovi/github-actions-docker-to-azure-vm@v1.0.1
+  with:
+    # Azure client ID
+    AZURE_ARM_CLIENT_ID: 
+    # Azure client secret
+    AZURE_ARM_CLIENT_SECRET: 
+    # Azure subscription ID
+    AZURE_ARM_SUBSCRIPTION_ID: 
+    # Azure tenant ID
+    AZURE_ARM_TENANT_ID: 
+    # Azure default region
+    AZURE_DEFAULT_REGION: # default is eastus
+    # Azure storage account name
+    AZURE_STORAGE_ACCOUNT: # default is bitops
+    # Azure storage account SKU
+    AZURE_STORAGE_SKU: # default is Standard_LRS
+    # Backend Bucket to use for Terraform state. Defaults to `${org}-${repo}-{branch}-tf-state`
+    tf_state_bucket: 
+    # Force purge and deletion of bucket on destroy. Any file contained there will be destroyed. `stack_destroy` must also be `true`
+    tf_state_bucket_destroy: # optional, default is true
+    # Set to override the Azure resource identifier for the deployment.  Defaults to `${org}-{repo}-{branch}`.  Use with destroy to destroy specific resources.
+    azure_resource_identifier: 
+    # Set to override the Azure VM username for the deployment.  Defaults to `ubuntu`.
+    azure_vm_admin_username: # default is ubuntu
+    # Set to override the Azure VM password for the deployment.  Defaults to `insecurePasswordABC123@`. Prefer GH Secrets.
+    azure_vm_admin_password: # default is insecurePasswordABC123@
+    # Set to true to run docker-compose down and docker system prune --all --force --volumes after.
+    docker_full_cleanup: # optional
+    # Relative path for the directory of the app (i.e. where `Dockerfile` and `docker-compose.yaml` files are located). This is the directory that is copied to the EC2 instance.  Default is the root of the repo. Add a .gha-ignore file with a list of files to be exluded.
+    app_directory: # optional
+    # Will generate a timestamped compressed file and delete the app repo directory.
+    app_directory_cleanup: # optional
+    # Port to expose for the app
+    app_port: # optional
+    # Load balancer listening port. Defaults to 80 if NO FQDN provided, 443 if FQDN provided
+    lb_port: # optional
+    # Load balancer health check string. Defaults to HTTP:app_port
+    lb_healthcheck: # optional
+    # Set to "true" to Destroy the stack. Will delete the elb_logs bucket after the destroy action runs.
+    stack_destroy: # optional, default is false
+    # Define the root domain name for the application. e.g. app.com
+    domain_name: # optional
+    # Define the sub-domain part of the URL. Defaults to `${org}-${repo}-{branch}`
+    sub_domain: # optional
+    # Deploy to root domain. Will generate two DNS recrods, one for root, another for www
+    root_domain: # optional
+    # Define the certificate ARN to use for the application
+    cert_arn: # optional
+    # Generates and manage the root cert for the application
+    create_root_cert: # optional
+    # Generates and manage the sub-domain certificate for the application
+    create_sub_cert: # optional
+    # Makes the application not to use a certificate by disabling certificate lookup.
+    no_cert: # optional
+    # A list of targets to create before the full stack creation. Example: `
+    targets: # optional
+    # A JSON object of additional tags that will be included on created resources. Example: `{"key1": "value1", "key2": "value2"}`
+    additional_tags: # optional
+    # Directory path in application env to mount directory, default is `data`
+    application_mount_target: # optional, default is data
+    # Directory path within docker env to mount directory to, default is `/data`
+    data_mount_target: # optional
+    # Set to "true" to enable debug mode
+    DEBUG_MODE: # optional, default is false
+    # Set to override the BitOps image to use for the deployment.  Defaults to `bitovi/bitops:latest`.
+    BITOPS_IMAGE: # optional, default is bitovi/bitops:latest
+- name: GitHub Action for DigitalOcean - doctl
+  # You may pin to the exact commit or the version.
+  # uses: digitalocean/action-doctl@ba7726ed64a9c5eb774152b1ea03bf67ee81ad6e
+  uses: digitalocean/action-doctl@v2.3.0
+  with:
+    # Version of doctl to install
+    version: # optional, default is latest
+    # DigitalOcean API Token
+    token:   # You may pin to the exact commit or the version.
+  # uses: JetBrains/writerside-github-action@0da3d96bb57e504c51d015387f48000dea763ce4
+  uses: JetBrains/writerside-github-action@v3- name: Build Writerside docs using Docker
+  # You may pin to the exact commit or the version.
+  # uses: JetBrains/writerside-github-action@0da3d96bb57e504c51d015387f48000dea763ce4
+  uses: JetBrains/writerside-github-action@v3
+  - name: Component Detection dependency submission action
+  # You may pin to the exact commit or the version.
+  # uses: advanced-security/component-detection-dependency-submission-action@5a8ce4ad8c6fbb9b88f66f672014e44b427d7d54
+  uses: advanced-security/component-detection-dependency-submission-action@v0.0.2
+  with:
+    # GitHub Personal Access Token (PAT). Defaults to PAT provided by Actions runner.
+    token: # optional, default is ${{ github.token }}
+    # The path to the directory containing the environment files to upload. Defaults to Actions working directory.
+    filePath: # optional, default is .
+    # Filters out specific directories following a minimatch pattern.
+    directoryExclusionList: # optional
+    # Comma separated list of properties that can affect the detectors execution, like EnableIfDefaultOff that allows a specific detector that is in beta to run, the format for this property is DetectorId=EnableIfDefaultOff, for example Pip=EnableIfDefaultOff.
+    detectorArgs: # optional
+    # Comma separated list of docker image names or hashes to execute container scanning on, ex: ubuntu:16.04,56bab49eef2ef07505f6a1b0d5bd3a601dfc3c76ad4460f24c91d6fa298369ab
+    dockerImagesToScan: # optional
+    # A comma separated list with the identifiers of the specific detectors to be used
+    . This is meant to be used for testing purposes only.
+    detectorsFilter: # optional
+    - name: databricks-import-directory
+  uses: microsoft/databricks-import-notebook@v1.0.0
+  with:
+    # Databricks host
+    databricks-host: 
+    # Databricks token
+    databricks-token: # optional
+    # LOCAL_NOTEBOOKS_PATH
+    local-path: 
+    # REMOTE_NOTEBOOK_PATH
+    remote-path: 
+    - name: data-factory-deploy
+  uses: Azure/data-factory-deploy-action@v1.2.0
+  with:
+    # Data Factory resource group name
+    resourceGroupName: 
+    # Data factory name
+    dataFactoryName: 
+    # ARM template file name
+    armTemplateFile: # optional, default is ARMTemplateForFactory.json
+    # ARM template parameters file name
+    armTemplateParametersFile: # optional, default is ARMTemplateParametersForFactory.json
+    # Parameters which will be replaced in the ARM template
+    additionalParameters: # optional, default is 
+    # Parameters which skip the Az module installation
+    skipAzModuleInstallation: # optional, default is false
+    
+    - name: DigitalOcean App Platform deployment
+  # You may pin to the exact commit or the version.
+  # uses: digitalocean/app_action@e583e1b463e8ac378854c0a01af1de8a5afd836b
+  uses: digitalocean/app_action@v1.1.5
+  with:
+    # Name of the app. (The name of the app must be unique across all apps in the same account.)
+    app_name: 
+    # DigitalOcean Personal Access Token.(use https://docs.digitalocean.com/reference/api/create-personal-access-token/ for creating new token)
+    token: 
+    # (OPTIONAL)a json array of objects with the properties name (description), repository (repo url), tag (image tag)
+    images: # optional, default is - name: DigitalOcean App Platform deployment
+  # You may pin to the exact commit or the version.
+  # uses: digitalocean/app_action@e583e1b463e8ac378854c0a01af1de8a5afd836b
+  uses: digitalocean/app_action@v1.1.5
+  with:
+    # Name of the app. (The name of the app must be unique across all apps in the same account.)
+    app_name: 
+    # DigitalOcean Personal Access Token.(use https://docs.digitalocean.com/reference/api/create-personal-access-token/ for creating new token)
+    token: 
+    # (OPTIONAL)a json array of objects with the properties name (description), repository (repo url), tag (image tag)
+    images: # optional, default is 
+    - name: Deploy a Deploy Request
+  # You may pin to the exact commit or the version.
+  # uses: planetscale/deploy-deploy-request-action@812fcef597edbb7fb434f9aa1714afa75ffb581c
+  uses: planetscale/deploy-deploy-request-action@v3
+  with:
+    # The name of the database.
+    database_name: 
+    # The number of the deploy request to deploy.
+    number: 
+    # The name of the organization that owns the database.
+    org_name: 
+    # If set to `true`, this action will wait for the deploy request to merge before exiting.
+    wait: # optional
+    - name: Liquibase Db Doc Action
+  # You may pin to the exact commit or the version.
+  # uses: liquibase-github-actions/db-doc@f7a0e38e6ae75b5e7e27d23831382336e43305b4
+  uses: liquibase-github-actions/db-doc@v4.23.0
+  with:
+    # *required* The root changelog
+    changelogFile: 
+    # The default catalog name to use for the database connection
+    defaultCatalogName: # optional
+    # The default schema name to use for the database connection
+    defaultSchemaName: # optional
+    # The JDBC driver class
+    driver: # optional
+    # The JDBC driver properties file
+    driverPropertiesFile: # optional
+    # *required* The directory where the documentation is generated
+    outputDirectory: 
+    # The database password
+    password: # optional
+    # Database schemas to include objects from in reporting
+    schemas: # optional
+    # *required* The JDBC database connection URL
+    url: 
+    # The database username
+    username: # optional
+    # If true, drop and recreate a view instead of replacing it.
+    alwaysDropInsteadOfReplace: # optional
+    # When generating SQL for createProcedure, should the procedure schema be forced to the default schema if no schemaName attribute is set?
+    alwaysOverrideStoredLogicSchema: # optional
+    # Should Liquibase automatically include REORG TABLE commands when needed?
+    autoReorg: # optional
+    # Number of seconds wait between checks to the changelog lock when it is locked
+    changelogLockPollRate: # optional
+    # Number of minutes to wait for the changelog lock to be available before giving up
+    changelogLockWaitTimeInMinutes: # optional
+    # Configures how to handle unknown fields in changelog files. Possible values: STRICT which causes parsing to fail, and LAX which continues with the parsing.
+    changelogParseMode: # optional
+    # Additional classpath entries to use
+    classpath: # optional
+    # Should Liquibase convert to/from STANDARD data types. Applies to both snapshot and update commands.
+    convertDataTypes: # optional
+    # Name of table to use for tracking concurrent Liquibase usage
+    databaseChangelogLockTableName: # optional
+    # Name of table to use for tracking change history
+    databaseChangelogTableName: # optional
+    # Class to use for Database implementation
+    databaseClass: # optional
+    # The DDL_LOCK_TIMEOUT parameter indicates the number of seconds a DDL command should wait for the locks to become available before throwing the resource busy error message. This applies only to Oracle databases.
+    ddlLockTimeout: # optional
+    # File with default Liquibase properties
+    defaultsFile: # optional
+    # Should Liquibase compare column order in diff operation?
+    diffColumnOrder: # optional
+    # How to handle multiple files being found in the search path that have duplicate paths. Options are WARN (log warning and choose one at random) or ERROR (fail current operation)
+    duplicateFileMode: # optional
+    # Throw an error if Liquibase detects that an includeAll will cause a circular reference (and thus a changelog parse error).
+    errorOnCircularIncludeAll: # optional
+    # Encoding to use when reading files. Valid values include: UTF-8, UTF-16, UTF-16BE, UTF-16LE, US-ASCII, or OS to use the system configured encoding.
+    fileEncoding: # optional
+    # DEPRECATED: No longer used
+    filterLogMessages: # optional
+    # Should Liquibase include a "created" attribute in diff/generateChangelog changesets with the current datetime
+    generateChangesetCreatedValues: # optional
+    # Should Liquibase include the change description in the id when generating changesets?
+    generatedChangesetIdsContainsDescription: # optional
+    # Force liquibase to think it has no access to a keyboard
+    headless: # optional
+    # Liquibase Hub API key for operations
+    hubApiKey: # optional
+    # Log level for filtering log messages to send to Liquibase Hub during operations. Values can be any acceptable log level.
+    hubLogLevel: # optional
+    # Content to send to Liquibase Hub during operations. Values can be "all", "meta", or "off"
+    hubMode: # optional
+    # Liquibase Hub URL for operations
+    hubUrl: # optional
+    # Should Liquibase include the catalog name when determining equality?
+    includeCatalogInSpecification: # optional
+    # Include the system classpath when resolving classes at runtime
+    includeSystemClasspath: # optional
+    # Liquibase Pro or Liquibase Labs license key used to unlock paid capabilities. Get a free trial at https://liquibase.com/trial and use in CLI or add liquibase.licenseKey=<yourKey> into your defaults file.
+    licenseKey: # optional
+    # Catalog to use for Liquibase objects
+    liquibaseCatalogName: # optional
+    # Schema to use for Liquibase objects
+    liquibaseSchemaName: # optional
+    # Tablespace to use for Liquibase objects
+    liquibaseTablespaceName: # optional
+    # Controls which log channels have their level set by the liquibase.logLevel setting. Comma separate multiple values. To set the level of all channels, use "all". Example: liquibase,org.mariadb.jdbc
+    logChannels: # optional
+    # 
+    logFile: # optional
+    # Sets the format of log output to console or log files. Open Source users default to unstructured "TEXT" logs to the console or output log files. Pro users have the option to set value as "JSON" or "JSON_PRETTY" to enable json-structured log files to the console or output log files.
+    logFormat: # optional
+    # Controls which logs get set to stderr AND to any log file. The CLI defaults, if log file set, to SEVERE. Others vary by integration. The official log levels are: OFF, SEVERE, WARNING, INFO, FINE
+    logLevel: # optional
+    # When set to true, the console messages are mirrored to the logs as [liquibase.ui] to provide a more complete picture of liquibase operations to log analysis tools. Set to false to change this behavior.
+    mirrorConsoleMessagesToLog: # optional
+    # How to handle changelog property expressions where a value is not set. For example, a string "${address}" when no "address" property was defined. Values can be: "preserve" which leaves the string as-is, "empty" which replaces it with an empty string, or "error" which stops processing with an error.
+    missingPropertyMode: # optional
+    # Enable performance tracking. Set to "false" to disable. If set to "true", data is stored to a `liquibase-TIMESTAMP.jfr` file in your working directory. Any other value will enable tracking and be used as the name of the file to write the data to.
+    monitorPerformance: # optional
+    # Custom executor that can specified
+    nativeExecutor: # optional
+    # If set to WARN, then liquibase will not throw exception on missing changelog file, instead will show a warning message.
+    onMissingIncludeChangelog: # optional
+    # 
+    outputFile: # optional
+    # Encoding to use when writing files
+    outputFileEncoding: # optional
+    # Line separator for output
+    outputLineSeparator: # optional
+    # Should liquibase treat schema and catalog names as case sensitive?
+    preserveSchemaCase: # optional
+    # DEPRECATED: Liquibase Pro license key used to unlock paid capabilities. Get a free trial at https://www.liquibase.com/protrial and use in CLI or add liquibase.pro.licenseKey=<yourKey> into your defaults file.
+    proLicenseKey: # optional
+    # If a column would be dropped in a diffChangeLog, call markUnused instead if set to true
+    proMarkUnusedNotDrop: # optional
+    # If true, generate changeSets with SQL-based changes inlined instead of saving them to an external file
+    proSqlInline: # optional
+    # If false, do not drop public synonyms in diffChangeLog/dropAll
+    proSynonymsDropPublic: # optional
+    # Should Liquibase prompt if a non-local database is being accessed
+    promptForNonLocalDatabase: # optional
+    # Implementation of Properties class to provide additional driver properties
+    propertyProviderClass: # optional
+    # Complete list of Location(s) to search for files such as changelog files in. Multiple paths can be specified by separating them with commas.
+    searchPath: # optional
+    # If true, remove functionality from file parsers which could be used insecurely. Examples include (but not limited to) disabling remote XML entity support.
+    secureParsing: # optional
+    # Should Liquibase commands execute
+    shouldRun: # optional
+    # Should Liquibase snapshot data by default?
+    shouldSnapshotData: # optional
+    # If true, show a Liquibase banner on startup.
+    showBanner: # optional
+    # Level to log SQL statements to
+    sqlLogLevel: # optional
+    # Be stricter on allowed Liquibase configuration and setup?
+    strict: # optional
+    # Support escaping changelog parameters using a colon. Example: ${:user.name}
+    supportPropertyEscaping: # optional
+    # If set to true (default value), createProcedure tags with a set schemaName will modify the procedure body with the given schema name.
+    useProcedureSchema: # optional
+    # Will perform xsd validation of XML changelog files. When many XML changelog files are included this validation may impact Liquibase performance. Defaults to true.
+    validateXmlChangelogFiles: # optional
+    - name: Deploy a Release in Octopus Deploy
+  # You may pin to the exact commit or the version.
+  # uses: OctopusDeploy/deploy-release-action@0eb8e144f5202b7a51f40e828a3dca488da1f838
+  uses: OctopusDeploy/deploy-release-action@v3.0.4
+  with:
+    # The name of the project associated with this release.
+    project: 
+    # The number for the release to deploy.
+    release_number: 
+    # A multi-line list of environments to deploy to.
+    environments: 
+    # Whether to use guided failure mode if errors occur during the deployment.
+    use_guided_failure: # optional
+    # A multi-line list of prompted variable values. Format: name:value
+    variables: # optional
+    # The instance URL hosting Octopus Deploy (i.e. "https://octopus.example.com/"). The instance URL is required, but you may also use the OCTOPUS_URL environment variable.
+    server: # optional
+    # The API key used to access Octopus Deploy. An API key is required, but you may also use the OCTOPUS_API_KEY environment variable. It is strongly recommended that this value retrieved from a GitHub secret.
+    api_key: # optional
+    # The name of a space within which this command will be executed. The space name is required, but you may also use the OCTOPUS_SPACE environment variable.
+    space: # optional
+    - name: Amazon ECS "Deploy Task Definition" Action for GitHub Actions
+  # You may pin to the exact commit or the version.
+  # uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
+  uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+  with:
+    # The path to the ECS task definition file to register
+    task-definition: 
+    # The name of the ECS service to deploy to. The action will only register the task definition if no service is given.
+    service: # optional
+    # The name of the ECS service's cluster.  Will default to the 'default' cluster
+    cluster: # optional
+    # Whether to wait for the ECS service to reach stable state after deploying the new task definition. Valid value is "true". Will default to not waiting.
+    wait-for-service-stability: # optional
+    # How long to wait for the ECS service to reach stable state, in minutes (default: 30 minutes, max: 6 hours). For CodeDeploy deployments, any wait time configured in the CodeDeploy deployment group will be added to this value.
+    wait-for-minutes: # optional
+    # The path to the AWS CodeDeploy AppSpec file, if the ECS service uses the CODE_DEPLOY deployment controller. Will default to 'appspec.yaml'.
+    codedeploy-appspec: # optional
+    # The name of the AWS CodeDeploy application, if the ECS service uses the CODE_DEPLOY deployment controller. Will default to 'AppECS-{cluster}-{service}'.
+    codedeploy-application: # optional
+    # The name of the AWS CodeDeploy deployment group, if the ECS service uses the CODE_DEPLOY deployment controller. Will default to 'DgpECS-{cluster}-{service}'.
+    codedeploy-deployment-group: # optional
+    # A description of the deployment, if the ECS service uses the CODE_DEPLOY deployment controller.
+    codedeploy-deployment-description: # optional
+    # Whether to force a new deployment of the service. Valid value is "true". Will default to not force a new deployment.
+    force-new-deployment: # optional
+    - name: Postgres Docker image with "baked-in" data
+  # You may pin to the exact commit or the version.
+  # uses: snaplet/publish-postgres-with-data-docker-action@6b93fedc6f8152823fda26d1fe10330ae94299d1
+  uses: snaplet/publish-postgres-with-data-docker-action@v1.0.0
+  with:
+    # Name of docker database container
+    docker-container-name: 
+    # Tag for docker image
+    docker-image-tag: 
+    # Connection string to restore a snapshot
+    snaplet-database-url: 
+    # Command used to restore a snapshot
+    snaplet-restore-command: # optional, default is snaplet snapshot restore --latest- name: Postgres Docker image with "baked-in" data
+  # You may pin to the exact commit or the version.
+  # uses: snaplet/publish-postgres-with-data-docker-action@6b93fedc6f8152823fda26d1fe10330ae94299d1
+  uses: snaplet/publish-postgres-with-data-docker-action@v1.0.0
+  with:
+    # Name of docker database container
+    docker-container-name: 
+    # Tag for docker image
+    docker-image-tag: 
+    # Connection string to restore a snapshot
+    snaplet-database-url: 
+    # Command used to restore a snapshot
+    snaplet-restore-command: # optional, default is snaplet snapshot restore --latest
+    - name: Delombok.
+  # You may pin to the exact commit or the version.
+  # uses: advanced-security/delombok@bda4362820a9a6b75a096d1a14b8cf5e3bb2c066
+  uses: advanced-security/delombok@v1
+  with:
+    # Path to the directory to delombok
+    directory: # optional, default is ${{ github.workspace }}
+    - name: Deploy Apache Airflow DAGs to Astro
+  # You may pin to the exact commit or the version.
+  # uses: astronomer/deploy-action@323bc234c160e0ee15db05b4f3b7c7f92c588252
+  uses: astronomer/deploy-action@v0.2
+  with:
+    # Path to to Astro project folder that contains that 'dags' folder
+    root-folder: # optional, default is ./
+    # If true DAGs will be parsed before deploying to Astro.
+    parse: # optional
+    # if true custom Pytests will be ran before deploying to Astro.
+    pytest: # optional
+    # Specify custom Pytest files to run with the pytest command.
+    pytest-file: # optional
+    # If true your code will be force deployedto Astornomer. Mostly uesd to skip parse test on image deploys.
+    force: # optional
+    # Specify a custom built image to deploy to an Asto Deployment.
+    image-name: # optional, default is no-custom-image
+    # Specify what action you would like to take. Use this option to create or delete deployment previews. Specify either 'create-deployment-preview', 'delete-deployment-preview' or 'deploy-deployment-preview'. Don't sepcify anything if you are deploying to a regular deployment.
+    action: # optional, default is deploy
+    # The name of the deployment you want to make preview from or are deploying too.
+    deployment-name: # optional
+    # The id of the deployment you to make a preview from or are deploying too.
+    deployment-id: # optional
+    # If you are using an organization token you will need to provide a workspace-name or id.
+    workspace: # optional
+    # Custom preview name. By default this is branch name “_” deployment name
+    preview-name: # optional
+    - name: DesigniteJava
+  # You may pin to the exact commit or the version.
+  # uses: DesigniteTools/DJAction@5de0ca090d14125c6057ba4ec74563c1020ca372
+  uses: DesigniteTools/DJAction@v1.0.1
+  with:
+    # Personal access token
+    PAT: # optional, default is No PAT provided
+    # provide the QScored api
+    QSCORED_API_KEY: # optional, default is No qscore provided
+    # User name (email) for QScored
+    EMAIL: # optional, default is No username provided
+    # QScored project name
+    PRJ_NAME: # optional, default is ${{ github.event.repository.name }}
+    # is code quality results open-source? True/False
+    OPEN_SOURCE: # optional
+    # Designite license key - optional
+    D_KEY: # optional, default is No key
+    - name: Deploy Apache Airflow DAGs to Astro
+  # You may pin to the exact commit or the version.
+  # uses: astronomer/deploy-action@323bc234c160e0ee15db05b4f3b7c7f92c588252
+  uses: astronomer/deploy-action@v0.2
+  with:
+    # Path to to Astro project folder that contains that 'dags' folder
+    root-folder: # optional, default is ./
+    # If true DAGs will be parsed before deploying to Astro.
+    parse: # optional
+    # if true custom Pytests will be ran before deploying to Astro.
+    pytest: # optional
+    # Specify custom Pytest files to run with the pytest command.
+    pytest-file: # optional
+    # If true your code will be force deployedto Astornomer. Mostly uesd to skip parse test on image deploys.
+    force: # optional
+    # Specify a custom built image to deploy to an Asto Deployment.
+    image-name: # optional, default is no-custom-image
+    # Specify what action you would like to take. Use this option to create or delete deployment previews. Specify either 'create-deployment-preview', 'delete-deployment-preview' or 'deploy-deployment-preview'. Don't sepcify anything if you are deploying to a regular deployment.
+    action: # optional, default is deploy
+    # The name of the deployment you want to make preview from or are deploying too.
+    deployment-name: # optional
+    # The id of the deployment you to make a preview from or are deploying too.
+    deployment-id: # optional
+    # If you are using an organization token you will need to provide a workspace-name or id.
+    workspace: # optional
+    # Custom preview name. By default this is branch name “_” deployment name
+    preview-name: # optional
+    - name: Steam - Deploy
+  # You may pin to the exact commit or the version.
+  # uses: game-ci/steam-deploy@26412a2c1ab0397207af1ecb1a85682f2a0ceea3
+  uses: game-ci/steam-deploy@v3.0.0
+  with:
+    # The username of your builder account.
+    username: # default is 
+    # The TOTP to use for login. If set, `configVdf`, `ssfnFileName`, and `ssfnFileContents` will be ignored.
+    totp: # optional
+    # The contents of STEAM_HOME/config/config.vdf. Required if `totp` is not set.
+    configVdf: # optional
+    # The app id within steam partner network.
+    appId: # default is 
+    # An optional override to specify the ID of the first depot instead of using the app ID plus one.
+    firstDepotIdOverride: # optional
+    # Description for this build.
+    buildDescription: # optional
+    # The root path to your builds. This is the base of which depots will search your files.
+    rootPath: # optional
+    # The path to depot1.
+    depot1Path: # optional
+    # The path to depot2.
+    depot2Path: # optional
+    # The path to depot3.
+    depot3Path: # optional
+    # The path to depot4.
+    depot4Path: # optional
+    # The path to depot5.
+    depot5Path: # optional
+    # The path to depot6.
+    depot6Path: # optional
+    # The path to depot7.
+    depot7Path: # optional
+    # The path to depot8.
+    depot8Path: # optional
+    # The path to depot9.
+    depot9Path: # optional
+    # The branch within steam that this build will be automatically put live on.
+    releaseBranch: # optional
+    - name: Docker promote
+  # You may pin to the exact commit or the version.
+  # uses: cloudposse/github-action-docker-promote@9356ad329802ce8d837940f2e1ef7e90da259aba
+  uses: cloudposse/github-action-docker-promote@0.1.2
+  with:
+    # Organization
+    organization: 
+    # Repository
+    repository: 
+    # Docker registry
+    registry: 
+    # Image name (excluding registry). Defaults to {{$organization/$repository}}.
+    image_name: # optional, default is 
+    # Source tag
+    from: # optional
+    # Target tags
+    to: # optional
+    # Extract target tags from Git reference and GitHub events
+    use_metadata: # optional, default is true
+    # Docker login
+    login: # optional, default is 
+    # Docker password
+    password: # optional, default is 
+    - name: dnsx Action
+  # You may pin to the exact commit or the version.
+  # uses: projectdiscovery/dnsx-action@e68997aeab40c8060ee36de70a51849ea46e48ef
+  uses: projectdiscovery/dnsx-action@v1.0.0
+  with:
+    # List of hosts to perform DNS resolution
+    list: # default is 
+    # File to save output result
+    output: # optional, default is dnsx.log
+    # Additional dnsx CLI flags to use
+    flags: # optional
+    # Format to save of output file
+    json: # optional
+    # List of custom resolvers to use
+    resolver: # optional, default is 
+    - name: ps-docs
+  uses: microsoft/ps-docs@v0.1.0
+  with:
+    # The path PSDocs will look for files to input files.
+    inputPath: # optional, default is 
+    # A comma separated list of modules to use containing document definitions.
+    modules: # optional, default is 
+    # An path containing definitions to use for generating documentation.
+    source: # optional, default is .ps-docs/
+    # A comma separated list of conventions to use for generating documentation.
+    conventions: # optional, default is 
+    # The path to write documentation to.
+    outputPath: # optional, default is 
+    # The working directory PSDocs is run from.
+    path: # optional, default is 
+    # Determine if a pre-release module version is installed.
+    prerelease: # optional, default is false
+    - name: Destroy Environment
+  # You may pin to the exact commit or the version.
+  # uses: parasoft/destroy-environment-action@d743e3bbffd5ff59a19764ae27b8b4c0bed6d4e8
+  uses: parasoft/destroy-environment-action@1.0.2
+  with:
+    # CTP URL
+    ctpUrl: 
+    # CTP Username
+    ctpUsername: 
+    # CTP Password
+    ctpPassword: 
+    # Name of the system
+    system: 
+    # Name of the environment
+    environment: - name: Destroy Environment
+  # You may pin to the exact commit or the version.
+  # uses: parasoft/destroy-environment-action@d743e3bbffd5ff59a19764ae27b8b4c0bed6d4e8
+  uses: parasoft/destroy-environment-action@1.0.2
+  with:
+    # CTP URL
+    ctpUrl: 
+    # CTP Username
+    ctpUsername: 
+    # CTP Password
+    ctpPassword: 
+    # Name of the system
+    system: 
+    # Name of the environment
+    environment: 
+    - name: Deploy Environment
+  # You may pin to the exact commit or the version.
+  # uses: parasoft/deploy-environment-action@486e9382c6c2958fcbaad60b895da799d16730c2
+  uses: parasoft/deploy-environment-action@1.0.2
+  with:
+    # CTP URL
+    ctpUrl: 
+    # CTP Username
+    ctpUsername: 
+    # CTP Password
+    ctpPassword: 
+    # Name of the system
+    system: 
+    # Name of the environment
+    environment: 
+    # Name of the environment instance to provision
+    instance: 
+    # Fail action and abort on provisioning failure
+    abortOnFailure: # optional
+    # Virtual assets in the environment will be replicated on another server
+    copyToVirtualize: # optional
+    # The environment assets will be copied to a Virtualize server matching this name
+    virtServerName: # optional
+    # The name for the replicated environment can be used to later destroy the environment
+    newEnvironmentName: # optional
+    # Duplicate associated data repositories before provisioning
+    duplicateDataRepo: # optional
+    # Where to duplicate data repository
+    duplicateType: # optional
+    # The host of the data repository server
+    repoHost: # optional
+    # The port of the data repository server
+    repoPort: # optional
+    # The username of the data repository server
+    repoUsername: # optional
+    # The password of the data repository server
+    repoPassword: # optional
+    - name: Disconnect Server
+  # You may pin to the exact commit or the version.
+  # uses: parasoft/disconnect-server-action@38f96c12af08dfa3bde1a417382cad62c41cd9fb
+  uses: parasoft/disconnect-server-action@1.0.2
+  with:
+    # CTP URL
+    ctpUrl: 
+    # CTP Username
+    ctpUsername: 
+    # CTP Password
+    ctpPassword: 
+    # Used to specify server by host or name
+    serverMatch: 
+    # Host or name of the server
+    server: - name: Disconnect Server
+  # You may pin to the exact commit or the version.
+  # uses: parasoft/disconnect-server-action@38f96c12af08dfa3bde1a417382cad62c41cd9fb
+  uses: parasoft/disconnect-server-action@1.0.2
+  with:
+    # CTP URL
+    ctpUrl: 
+    # CTP Username
+    ctpUsername: 
+    # CTP Password
+    ctpPassword: 
+    # Used to specify server by host or name
+    serverMatch: 
+    # Host or name of the server
+    server: 
+    - name: Seek Deployment
+  # You may pin to the exact commit or the version.
+  # uses: cloudposse/github-action-seek-deployment@a9e3aad3e3209bf82cf8c14faa61ddee51d9b3eb
+  uses: cloudposse/github-action-seek-deployment@0.1.0
+  with:
+    # The GitHub token
+    github-token: # default is ${{ github.token }}
+    # Branch or commit SHA
+    ref: 
+    # Environment name
+    environment: 
+    # Deployment status
+    status: # optional- name: Seek Deployment
+  # You may pin to the exact commit or the version.
+  # uses: cloudposse/github-action-seek-deployment@a9e3aad3e3209bf82cf8c14faa61ddee51d9b3eb
+  uses: cloudposse/github-action-seek-deployment@0.1.0
+  with:
+    # The GitHub token
+    github-token: # default is ${{ github.token }}
+    # Branch or commit SHA
+    ref: 
+    # Environment name
+    environment: 
+    # Deployment status
+    status: # optional
+    - name: Deploy HelmFile
+  # You may pin to the exact commit or the version.
+  # uses: cloudposse/github-action-deploy-helmfile@e5396120c8d09d826889c286a3c7e27fa17f3f15
+  uses: cloudposse/github-action-deploy-helmfile@0.5.0
+  with:
+    # Cluster name
+    cluster: 
+    # AWS region
+    aws-region: # optional, default is us-east-1
+    # The path where lives the helmfile.
+    helmfile-path: # optional, default is deploy
+    # Helmfile name
+    helmfile: # optional, default is helmfile.yaml
+    # Operation with helmfiles. (valid options - `deploy`, `destroy`)
+    operation: # default is deploy
+    # Helmfile environment
+    environment: # optional, default is preview
+    # Git SHA
+    gitref-sha: # optional, default is 
+    # Kubernetes namespace
+    namespace: 
+    # Docker image
+    image: 
+    # Docker image tag
+    image-tag: 
+    # Debug mode
+    debug: # optional, default is false
+    # The name of the label used to describe the helm release
+    release_label_name: # optional, default is release
+    # YAML string with extra values to use in a helmfile deploy
+    values_yaml: # optional
+    # Helm version
+    helm_version: # optional, default is 3.11.1
+    # Helmfile version
+    helmfile_version: # optional, default is 0.143.5
+    # Kubectl version
+    kubectl_version: # optional, default is 1.26.3
+    # Kubectl version
+    chamber_version: # optional, default is 2.11.1
+    - name: scalastyle-download
+  uses: microsoft/scala-style-download@v1.0.0
+  with:
+    # Scalastyle jar URL
+    scalastyle-url: # optional, default is https://repo1.maven.org/maven2/org/scalastyle/scalastyle_2.12/1.0.0/scalastyle_2.12-1.0.0-batch.jar- name: scalastyle-download
+  uses: microsoft/scala-style-download@v1.0.0
+  with:
+    # Scalastyle jar URL
+    scalastyle-url: # optional, default is https://repo1.maven.org/maven2/org/scalastyle/scalastyle_2.12/1.0.0/scalastyle_2.12-1.0.0-batch.jar
+    - name: Delete Namespace
+  # You may pin to the exact commit or the version.
+  # uses: okteto/delete-namespace@b2f2fc53fb811e5cd72ce7766d5c962b3f7b96a5
+  uses: okteto/delete-namespace@2.17.0
+  with:
+    # The name of the namespace to delete
+    namespace: 
+    - name: Docker Login
+  # You may pin to the exact commit or the version.
+  # uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc
+  uses: docker/login-action@v2.2.0
+  with:
+    # Server address of Docker registry. If not set then will default to Docker Hub
+    registry: # optional
+    # Username used to log against the Docker registry
+    username: # optional
+    # Password or personal access token used to log against the Docker registry
+    password: # optional
+    # Specifies whether the given registry is ECR (auto, true or false)
+    ecr: # optional, default is auto
+    # Log out from the Docker registry at the end of a job
+    logout: # optional, default is true
+    - name: Docker Scout
+  # You may pin to the exact commit or the version.
+  # uses: docker/scout-action@92c3896e385a4b3eac289ed728202ff37cc2d312
+  uses: docker/scout-action@v0.18.1
+  with:
+    # Command(s) to run.
+Use a comma separated list to run several commands on the same set of parameters, for instance quickview,compare
+
+    command: 
+    # Debug
+    debug: # optional
+    # Publish the output as GitHub Action summary
+    summary: # optional, default is true
+    # Image to analyze
+    image: # optional
+    # Platform of the image to analyze
+    platform: # optional
+    # Type of image
+    type: # optional
+    # Ref if needed
+    ref: # optional
+    # Image to compare to
+    to: # optional
+    # Type of image to compare
+    to-type: # optional
+    # Ref of image to compare
+    to-ref: # optional
+    # Compare to image in stream
+    to-stream: # optional
+    # Compare to latest pushed image
+    to-latest: # optional
+    # Name of the application when recording to a stream
+    to-app: # optional
+    # Ignore vulnerabilities from base image
+    ignore-base: # optional
+    # Filter out unchanged packages
+    ignore-unchanged: # optional
+    # Filter out CVEs that are marked not affected by a VEX statement
+    ignore-vex: # optional
+    # Filter to fixable CVEs
+    only-fixed: # optional
+    # Filter to unfixed CVEs
+    only-unfixed: # optional
+    # Comma separated list of severities (critical, high, medium, low, unspecified) to filter CVEs by
+    only-severities: # optional
+    # Comma separated list of package types (like apk, deb, rpm, npm, pypi, golang, etc)
+    only-package-types: # optional
+    # Return exit code '2' if vulnerability changes are detected
+    exit-code: # optional
+    # Docker Hub User
+    dockerhub-user: # optional
+    # Docker Hub PAT
+    dockerhub-password: # optional
+    # Registry user to pull images
+    registry-user: # optional
+    # Registry password to pull images
+    registry-password: # optional
+    # GitHub Token to write comments
+    github-token: # optional, default is ${{ github.token }}
+    # Write the output as a Pull Request comment
+    write-comment: # optional, default is true
+    # If set, keep but hide previous comment. If not set, keep and update one single comment per job
+    keep-previous-comments: # optional
+    - name: Deploy ArgoCD
+  # You may pin to the exact commit or the version.
+  # uses: cloudposse/github-action-deploy-argocd@3c8cb714f7140195e93dd2ec70bc06c5ea4bb3f7
+  uses: cloudposse/github-action-deploy-argocd@0.6.0
+  with:
+    # Cluster name
+    cluster: 
+    # AWS region
+    aws-region: # optional, default is us-east-1
+    # The path where lives the helmfile or helm chart.
+    path: 
+    # Toolchain ('helm', 'helmfile')
+    toolchain: # optional, default is helmfile
+    # SSM path to read environment secrets
+    ssm-path: 
+    # Operation with helmfiles. (valid options - `deploy`, `destroy`)
+    operation: # default is deploy
+    # Helmfile environment
+    environment: # optional, default is preview
+    # Application GitHub repository full name
+    repository: 
+    # Git ref
+    ref: 
+    # Git SHA (Depricated. Use `ref` instead)
+    gitref-sha: # optional, default is 
+    # Kubernetes namespace
+    namespace: 
+    # Application name
+    application: 
+    # Docker image
+    image: 
+    # Docker image tag
+    image-tag: 
+    # Debug mode
+    debug: # optional, default is false
+    # Helmfile values file
+    values_file: # optional, default is 
+    # The name of the label used to describe the helm release
+    release_label_name: # optional, default is release
+    # Github PAT to access argocd configuration repository
+    github-pat: 
+    # Wait until ArgoCD successfully apply the changes
+    synchronously: # optional, default is false
+    # Timeout check (in seconds) (for synchronously mode)
+    check-timeout: # optional, default is 600
+    # Check retry count (for synchronously mode)
+    check-retry-count: # optional, default is 5
+    # Check retry interval (in seconds) (for synchronously mode)
+    check-retry-interval: # optional, default is 10
+    - name: Vercel Snaplet Deployments
+  # You may pin to the exact commit or the version.
+  # uses: snaplet/vercel-preview-database-action@3a1bef8c9ac9f69e5c472833e830166273661b7f
+  uses: snaplet/vercel-preview-database-action@v1.0.1
+  with:
+    # Delete the preview on vercel and the instant database related to it
+    delete: # optional, default is ${{ github.event.action == 'closed' }}
+    # Await for the deployment to be ready and output the deployment URL
+    vercel-await-for-deployment: # optional
+    # The environment variable name to set the preview database deployment URL
+    vercel-env: # optional, default is DATABASE_URL
+    # Command set for the Ignored Build Step in your project settings, the default script is canceling every preview deployments coming from the Vercel GitHub App.
+    vercel-ignored-build-command: # optional, default is curl -sS "https://raw.githubusercontent.com/snaplet/vercel-action/v3/scripts/ignore-build.mjs" | node --input-type=module
+    # Command used to generate the instant database
+    database-create-command: # optional, default is snaplet preview-database create --git --latest
+    # Command used to delete the instant database
+    database-delete-command: # optional, default is snaplet preview-database drop --git
+    # Command used to get the instant database url
+    database-url-command: # optional, default is snaplet preview-database url --git
+    # Reset the database state on each commit
+    database-reset: # optional
+    - name: data-factory-export
+  uses: Azure/data-factory-export-action@v1.2.0
+  with:
+    # Directory that contains the Data Factory resources
+    path: # optional, default is ./
+    # Data Factory resource ID
+    id: # optional, default is /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourceGroup/providers/Microsoft.DataFactory/factories/dataFactory
+    - name: Dependency Review
+  uses: actions/dependency-review-action@v3.0.6
+  with:
+    # Token for the repository. Can be passed in using `{{ secrets.GITHUB_TOKEN }}`.
+    repo-token: # optional, default is ${{ github.token }}
+    # Don't block PRs below this severity. Possible values are `low`, `moderate`, `high`, `critical`.
+    fail-on-severity: # optional
+    # Dependency scopes to block PRs on. Comma-separated list. Possible values are 'unknown', 'runtime', and 'development' (e.g. "runtime, development")
+    fail-on-scopes: # optional
+    # The base git ref to be used for this check. Has a default value when the workflow event is `pull_request` or `pull_request_target`. Must be provided otherwise.
+    base-ref: # optional
+    # The head git ref to be used for this check. Has a default value when the workflow event is `pull_request` or `pull_request_target`. Must be provided otherwise.
+    head-ref: # optional
+    # A path to the configuration file for the action.
+    config-file: # optional
+    # Comma-separated list of allowed licenses (e.g. "MIT, GPL 3.0, BSD 2 Clause")
+    allow-licenses: # optional
+    # Comma-separated list of forbidden licenses (e.g. "MIT, GPL 3.0, BSD 2 Clause")
+    deny-licenses: # optional
+    # Comma-separated list of dependencies in purl format (e.g. "pkg:npm/express, pkg:pip/pycrypto"). These dependencies will be permitted to use any license, no matter what license policy is enforced otherwise.
+    allow-dependencies-licenses: # optional
+    # Comma-separated list of allowed GitHub Advisory IDs (e.g. "GHSA-abcd-1234-5679, GHSA-efgh-1234-5679")
+    allow-ghsas: # optional
+    # A token for fetching external configuration file if it lives in another repository. It is required if the repository is private
+    external-repo-token: # optional
+    # A boolean to determine if license checks should be performed
+    license-check: # optional
+    # A boolean to determine if vulnerability checks should be performed
+    vulnerability-check: # optional
+    # A boolean to determine if the report should be posted as a comment in the PR itself. Setting this to true requires you to give the workflow the write permissions for pull-requests
+    comment-summary-in-pr: # optional
+    - name: branch-deploy
+  uses: github/branch-deploy@v6.0.1
+  with:
+    # The GitHub token used to create an authenticated client - Provided for you by default!
+    github_token: # default is ${{ github.token }}
+    # The status of the GitHub Actions - For use in the post run workflow - Provided for you by default!
+    status: # default is ${{ job.status }}
+    # The name of the default environment to deploy to. Example: by default, if you type `.deploy`, it will assume "production" as the default environment
+    environment: # optional, default is production
+    # Optional (or additional) target environments to select for use with deployments. Example, "production,development,staging". Example  usage: `.deploy to development`, `.deploy to production`, `.deploy to staging`
+    environment_targets: # optional, default is production,development,staging
+    # Optional target environment URLs to use with deployments. This input option is a mapping of environment names to URLs and the environment names must match the "environment_targets" input option. This option is a comma separated list with pipes (|) separating the environment from the URL. Note: "disabled" is a special keyword to disable an environment url if you enable this option. Format: "<environment1>|<url1>,<environment2>|<url2>,etc" Example: "production|https://myapp.com,development|https://dev.myapp.com,staging|disabled"
+    environment_urls: # optional, default is 
+    # If the environment_url detected in the deployment should be appended to the successful deployment comment or not. Examples: "true" or "false"
+    environment_url_in_comment: # optional, default is true
+    # The name of the production environment. Example: "production". By default, GitHub will set the "production_environment" to "true" if the environment name is "production". This option allows you to override that behavior so you can use "prod", "prd", "main", etc. as your production environment name.
+    production_environment: # optional, default is production
+    # If set, the specified emoji "reaction" is put on the comment to indicate that the trigger was detected. For example, "rocket" or "eyes"
+    reaction: # optional, default is eyes
+    # The string to look for in comments as an IssueOps trigger. Example: ".deploy"
+    trigger: # optional, default is .deploy
+    # The string to look for in comments as an IssueOps noop trigger. Example: "noop"
+    noop_trigger: # optional, default is noop
+    # The string to look for in comments as an IssueOps lock trigger. Used for locking branch deployments on a specific branch. Example: ".lock"
+    lock_trigger: # optional, default is .lock
+    # The string to look for in comments as an IssueOps unlock trigger. Used for unlocking branch deployments. Example: ".unlock"
+    unlock_trigger: # optional, default is .unlock
+    # The string to look for in comments as an IssueOps help trigger. Example: ".help"
+    help_trigger: # optional, default is .help
+    # An alias or shortcut to get details about the current lock (if it exists) Example: ".info"
+    lock_info_alias: # optional, default is .wcid
+    # The allowed GitHub permissions an actor can have to invoke IssueOps commands - Example: "write,maintain,admin"
+    permissions: # default is write,maintain,admin
+    # The separator to use for parsing parameters in comments in deployment requests. Parameters will are saved as outputs and can be used in subsequent steps
+    param_separator: # optional, default is |
+    # The flag to pass into the lock command to lock all environments. Example: "--global"
+    global_lock_flag: # optional, default is --global
+    # The name of a stable branch to deploy to (rollbacks). Example: "main"
+    stable_branch: # optional, default is main
+    # Determine how you want this Action to handle "out-of-date" branches. Available options: "disabled", "warn", "force". "disabled" means that the Action will not care if a branch is out-of-date. "warn" means that the Action will warn the user that a branch is out-of-date and exit without deploying. "force" means that the Action will force update the branch. Note: The "force" option is not recommended due to Actions not being able to re-run CI on commits originating from Actions itself
+    update_branch: # optional, default is warn
+    # Manually enforce commit status checks before a deployment can continue. Only use this option if you wish to manually override the settings you have configured for your branch protection settings for your GitHub repository. Default is "false" - Example value: "context1,context2,context3" - In most cases you will not need to touch this option
+    required_contexts: # optional, default is false
+    # A comma separated list of environments that will not use passing CI as a requirement for deployment. Use this option to explicitly bypass branch protection settings for a certain environment in your repository. Default is an empty string "" - Example: "development,staging"
+    skip_ci: # optional, default is 
+    # A comma separated list of environment that will not use reviews/approvals as a requirement for deployment. Use this options to explicitly bypass branch protection settings for a certain environment in your repository. Default is an empty string "" - Example: "development,staging"
+    skip_reviews: # optional, default is 
+    # Allow branch deployments to run on repository forks. If you want to harden your workflows, this option can be set to false. Default is "true"
+    allow_forks: # optional, default is true
+    # A comma separated list of GitHub usernames or teams that should be considered admins by this Action. Admins can deploy pull requests without the need for branch protection approvals. Example: "monalisa,octocat,my-org/my-team"
+    admins: # optional, default is false
+    # A GitHub personal access token with "read:org" scopes. This is only needed if you are using the "admins" option with a GitHub org team. For example: "my-org/my-team"
+    admins_pat: # optional, default is false
+    # This is an advanced option that is an alternate workflow bundled into this Action. You can control how merge commits are handled when a PR is merged into your repository's default branch. If the merge commit SHA matches the latest deployment for the same environment, then the 'continue' output will be set to 'false' which indicates that a deployment should not be performed again as the latest deployment is identical. If the merge commit SHA does not match the latest deployment for the same environment, then the 'continue' output will be set to 'true' which indicates that a deployment should be performed. With this option, the 'environment' output is also set for subsequent steps to reference
+    merge_deploy_mode: # optional, default is false
+    # This is an advanced option that is an alternate workflow bundled into this Action. You can optionally use this mode in a custom workflow to automatically release all locks that came from a pull request when the pull request is merged. This is useful if you want to ensure that locks are not left behind when a pull request is merged.
+    unlock_on_merge_mode: # optional, default is false
+    # If set to "true", skip the process of completing a deployment. You must manually create a deployment status after the deployment is complete. Default is "false"
+    skip_completing: # optional, default is false
+    - name: Snaplet Preview Databases
+  # You may pin to the exact commit or the version.
+  # uses: snaplet/action@97af02d55e80e9bd845b2bcbcd74eb74189eae28
+  uses: snaplet/action@v1.1.2
+  with:
+    # Command used to generate the instant database
+    database-create-command: # optional, default is snaplet preview-database create --git --latest
+    # Command used to delete the instant database
+    database-delete-command: # optional, default is snaplet preview-database drop --git
+    # Command used to get the instant database url
+    database-url-command: # optional, default is snaplet preview-database url --git
+    # Delete the database
+    delete: # optional
+    # Reset the database state on each commit
+    reset: # optional
+    - name: Dapr tool installer
+  # You may pin to the exact commit or the version.
+  # uses: dapr/setup-dapr@ffde132592c51fcb876dff3925598fd150137569
+  uses: dapr/setup-dapr@v1
+  with:
+    # Version of Dapr CLI to install
+    version: # optional, default is 1.2.0
+    
